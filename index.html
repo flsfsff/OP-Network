@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OP Network - Minecraft Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0a0a0f;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(120, 40, 200, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f23 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+            padding: 1.2rem 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffab40 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+
+        .logo::before {
+            content: 'OP NETWORK';
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: blur(8px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes logoGlow {
+            0% { 
+                filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.3));
+                transform: scale(1);
+            }
+            100% { 
+                filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.6));
+                transform: scale(1.02);
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(247, 147, 30, 0.1));
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.15);
+        }
+
+        .nav-links a.active {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Main Content */
+        .main {
+            margin-top: 100px;
+            min-height: calc(100vh - 100px);
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Home Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: heroSlideIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+            border-radius: 2px;
+            animation: underlineGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes underlineGlow {
+            0% { opacity: 0.3; transform: translateX(-50%) scaleX(0.8); }
+            100% { opacity: 0.8; transform: translateX(-50%) scaleX(1.2); }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            opacity: 0.85;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+            animation: heroSlideIn 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+
+        @keyframes heroSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Server Cards */
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .server-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            animation: cardFadeIn 0.8s ease;
+        }
+
+        .server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .server-card::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e, #4fc3f7);
+            border-radius: 22px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.4s ease;
+        }
+
+        .server-card:hover::before {
+            left: 100%;
+        }
+
+        .server-card:hover::after {
+            opacity: 0.3;
+        }
+
+        .server-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                0 0 50px rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        /* IP Copy Button */
+        .ip-button {
+            background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.02em;
+        }
+
+        .ip-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .ip-button:hover::before {
+            left: 100%;
+        }
+
+        .ip-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.4);
+        }
+
+        .ip-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .ip-button.copied {
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .server-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffab40 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: iconFloat 3s ease-in-out infinite;
+            box-shadow: 
+                0 10px 30px rgba(255, 107, 53, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .server-icon::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-radius: 22px;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.4;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-8px) rotate(2deg); }
+            66% { transform: translateY(4px) rotate(-1deg); }
+        }
+
+        .server-card h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #4fc3f7;
+            letter-spacing: -0.01em;
+        }
+
+        .server-card p {
+            opacity: 0.85;
+            line-height: 1.7;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Rules Section */
+        .rules-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .rules-container h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rules-intro {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            opacity: 0.85;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .rules-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            animation: slideInUp 0.8s ease 0.8s both;
+        }
+
+        .rules-footer p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ff6b35;
+            margin: 0;
+        }
+
+        .rule-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease;
+        }
+
+        .rule-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(10px);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .rule-item h4 {
+            color: #ff6b35;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Discord Button */
+        .discord-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+            color: white;
+            padding: 1.2rem 2rem;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(88, 101, 242, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            animation: discordPulse 3s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            letter-spacing: 0.02em;
+            z-index: 1001;
+        }
+
+        .discord-btn::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #5865f2, #4752c4, #7289da);
+            border-radius: 60px;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes discordPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 8px 25px rgba(88, 101, 242, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 12px 35px rgba(88, 101, 242, 0.6),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 15px 40px rgba(88, 101, 242, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .discord-btn:hover::before {
+            opacity: 0.8;
+        }
+
+        /* Floating Animation */
+        .floating {
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 60px;
+            height: 60px;
+            background: rgba(79, 195, 247, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+
+        .floating:nth-child(3) {
+            top: 80%;
+            left: 20%;
+            animation-delay: -4s;
+            animation-duration: 7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+
+        /* Copy Success Notification */
+        .copy-notification {
+            position: fixed;
+            top: 120px;
+            right: 2rem;
+            background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.4);
+            z-index: 1002;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .copy-notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .servers-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .discord-btn {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.8rem 1.2rem;
+            }
+
+            .copy-notification {
+                right: 1rem;
+                top: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Elements -->
+    <div class="floating"></div>
+    <div class="floating"></div>
+    <div class="floating"></div>
+
+    <!-- Copy Notification -->
+    <div id="copyNotification" class="copy-notification">
+        ✅ IP-Adresse kopiert!
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">OP NETWORK</div>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link active" data-section="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-section="rules">Regeln</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>OP NETWORK</h1>
+                <p>Erlebe das ultimative Minecraft-Abenteuer auf unseren Premium-Servern!</p>
+            </div>
+
+            <div class="servers-grid">
+                <div class="server-card" style="animation-delay: 0.1s;">
+                    <button class="ip-button" onclick="copyIP('play.opnetwork.de', this)">
+                        📋 play.opnetwork.de
+                    </button>
+                    <div class="server-icon">🏝️</div>
+                    <h3>OP Insel Adventure</h3>
+                    <p>Baue deine eigene Insel auf, sammle Ressourcen und werde zum mächtigsten Spieler im Skyblock-Universum. Mit einzigartigen Quests und Custom Items!</p>
+                </div>
+
+                <div class="server-card" style="animation-delay: 0.3s;">
+                    <button class="ip-button" onclick="copyIP('duels.opnetwork.de', this)">
+                        📋 duels.opnetwork.de
+                    </button>
+                    <div class="server-icon">⚔️</div>
+                    <h3>Duels Minecraft Fights</h3>
+                    <p>Kämpfe gegen andere Spieler in epischen 1v1 Duellen! Verschiedene Kits, Arenen und ein Ranking-System warten auf dich. Beweise dein Können!</p>
+                </div>
+
+                <div class="server-card" style="animation-delay: 0.5s;">
+                    <button class="ip-button" onclick="copyIP('city.opnetwork.de', this)">
+                        📋 city.opnetwork.de
+                    </button>
+                    <div class="server-icon">🏙️</div>
+                    <h3>Block City</h3>
+                    <p>Erschaffe deine eigene Stadt! Ein kreativer City-Build Server mit Plot-System, wo du deine Traumstadt bauen und mit anderen Spielern handeln kannst.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rules Section -->
+        <section id="rules" class="section">
+            <div class="rules-container">
+                <h2>📜 OP Network – Serverregeln</h2>
+                <p class="rules-intro">Willkommen bei <strong>OP Network</strong>!<br>Bitte halte dich an diese Regeln, damit alle Spaß haben können.</p>
+                
+                <div class="rule-item" style="animation-delay: 0.1s;">
+                    <h4>1. Kein Platz für Diskriminierung</h4>
+                    <p>Rassismus, Sexismus, Homophobie & Co. sind verboten.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.15s;">
+                    <h4>2. Respektvoll bleiben</h4>
+                    <p>Keine Beleidigungen oder Provokationen gegenüber anderen Spielern oder Teammitgliedern.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.2s;">
+                    <h4>3. Team-Anweisungen gelten</h4>
+                    <p>Den Anweisungen des Teams ist Folge zu leisten – sie haben Hausrecht.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.25s;">
+                    <h4>4. Keine Fremdwerbung</h4>
+                    <p>Server, Webseiten oder Produkte dürfen nicht beworben werden.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.3s;">
+                    <h4>5. Kein Spam oder CAPS</h4>
+                    <p>Verhalte dich im Chat ordentlich – kein Flooding, Spam oder Dauercaps.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.35s;">
+                    <h4>6. Keine unerlaubten Tools</h4>
+                    <p>Mods, Hacks oder Tools mit Spielvorteil sind untersagt.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.4s;">
+                    <h4>7. Keine Bugs ausnutzen</h4>
+                    <p>Fehler sind zu melden, nicht auszunutzen.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.45s;">
+                    <h4>8. Konflikte nur über das Team klären</h4>
+                    <p>Diskussionen außerhalb des Servers (z. B. Discord) sind zu vermeiden.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.5s;">
+                    <h4>9. Kein unnötiges Pingen höherer Teammitglieder</h4>
+                    <p>Admins & Owner nur bei wichtigen Anliegen kontaktieren.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.55s;">
+                    <h4>10. Kein unangebrachter Content</h4>
+                    <p>Anstößige Namen, Skins oder Bauwerke werden entfernt.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.6s;">
+                    <h4>11. Keine Bots & Auto-Clicker</h4>
+                    <p>Automatisiertes Verhalten ist nicht erlaubt.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.65s;">
+                    <h4>12. Du bist für dein Verhalten verantwortlich</h4>
+                    <p>Unwissen schützt nicht – halte dich an die Regeln.</p>
+                </div>
+
+                <div class="rule-item" style="animation-delay: 0.7s;">
+                    <h4>13. Multi-Accounts nur mit Erlaubnis</h4>
+                    <p>Zweitaccounts nur nach Rücksprache erlaubt.</p>
+                </div>
+
+                <div class="rules-footer">
+                    <p>OP Network – Gemeinsam fair spielen</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Discord Button -->
+    <a href="https://discord.gg/n6mGbx58dn" class="discord-btn" target="_blank">
+        <span>💬</span>
+        Discord beitreten
+    </a>
+
+    <script>
+        // Copy IP Function
+        function copyIP(ip, button) {
+            navigator.clipboard.writeText(ip).then(() => {
+                // Change button appearance
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Kopiert!';
+                button.classList.add('copied');
+                
+                // Show notification
+                const notification = document.getElementById('copyNotification');
+                notification.classList.add('show');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                    notification.classList.remove('show');
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = ip;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Kopiert!';
+                button.classList.add('copied');
+                
+                const notification = document.getElementById('copy
